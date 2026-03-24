@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact Form Example</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 500px; margin: 60px auto; padding: 0 20px; }
+    h2  { margin-bottom: 20px; }
+    label { display: block; margin-top: 14px; font-weight: bold; }
+    input, textarea {
+      width: 100%; padding: 10px; margin-top: 5px;
+      border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
+    }
+    textarea { height: 120px; resize: vertical; }
+    button {
+      margin-top: 20px; width: 100%; padding: 12px;
+      background: #4f46e5; color: white; border: none;
+      border-radius: 6px; font-size: 16px; cursor: pointer;
+    }
+    button:hover { background: #4338ca; }
+    #response-msg { margin-top: 16px; padding: 12px; border-radius: 6px; display: none; }
+    .success { background: #d1fae5; color: #065f46; }
+    .error   { background: #fee2e2; color: #991b1b; }
+  </style>
+</head>
+<body>
+
+  <h2>📬 Contact Us</h2>
+
+  <!--
+    👇 Replace the action URL with your live API URL after deployment
+       Example:  action="https://your-app.onrender.com/submit-form"
+  -->
+  <form id="contactForm" action="http://localhost:3000/submit-form" method="POST">
+
+    <label for="name">Full Name *</label>
+    <input type="text" id="name" name="name" placeholder="John Doe" required />
+
+    <label for="email">Email Address *</label>
+    <input type="email" id="email" name="email" placeholder="john@example.com" required />
+
+    <label for="phone">Phone Number *</label>
+    <input type="tel" id="phone" name="phone" placeholder="+91 98765 43210" required />
+
+    <label for="message">Message *</label>
+    <textarea id="message" name="message" placeholder="Write your message here..." required></textarea>
+
+    <button type="submit">Send Message</button>
+  </form>
+
+  <div id="response-msg"></div>
+
+  <!-- Optional: intercept submit to show a nice success message without page reload -->
+  <script>
+    const form = document.getElementById("contactForm");
+    const msg  = document.getElementById("response-msg");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      msg.style.display = "none";
+
+      const data = new URLSearchParams(new FormData(form));
+
+      try {
+        const res  = await fetch(form.action, { method: "POST", body: data });
+        const json = await res.json();
+
+        if (json.success) {
+          msg.className = "success";
+          msg.textContent = "✅ " + json.message;
+          form.reset();
+        } else {
+          msg.className = "error";
+          msg.textContent = "❌ " + (json.errors ? json.errors.join(" ") : "Something went wrong.");
+        }
+      } catch (err) {
+        msg.className = "error";
+        msg.textContent = "❌ Could not reach the server. Make sure it is running.";
+      }
+
+      msg.style.display = "block";
+    });
+  </script>
+
+</body>
+</html>
